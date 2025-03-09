@@ -89,7 +89,7 @@ python dns_config_generator.py
 生成的 .mobileconfig 文件可以通過以下方式安裝：
 - 通過 AirDrop 發送到設備
 - 通過郵件發送到設備
-- 通過 Safari 瀏覽器下載到設備
+- 通過 iCloud 下載到設備
 
 ## ⚠️ 注意事項
 
