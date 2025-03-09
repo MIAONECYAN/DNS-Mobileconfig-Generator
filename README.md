@@ -27,6 +27,8 @@
   - 私鑰文件 (.key/.txt)
   - 支持加密的私鑰
 
+<img src="Preview.png" width="70%">
+
 ## 🛠️ 安裝要求
 
 ### 環境需求
