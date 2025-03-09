@@ -19,16 +19,16 @@ class DNSConfigGenerator(QMainWindow):
         self.setWindowTitle("DNS 設定檔生成器")
         self.setGeometry(100, 100, 800, 600)
         
-        # 创建中央部件和主布局
+        # 創建中央部件和主佈局
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
         
-        # DNS 服务器配置
+        # DNS 伺服器配置
         dns_group = QWidget()
         dns_layout = QVBoxLayout(dns_group)
         
-        # DNS 类型选择
+        # DNS 類型選擇
         type_layout = QHBoxLayout()
         self.dns_type = QComboBox()
         self.dns_type.addItems(["DNS over HTTPS", "DNS over TLS", "DNS over HTTPS/3"])
@@ -37,14 +37,14 @@ class DNSConfigGenerator(QMainWindow):
         type_layout.addWidget(self.dns_type)
         dns_layout.addLayout(type_layout)
         
-        # 服务器 URL/主机名
+        # 伺服器 URL/主機名
         server_layout = QHBoxLayout()
         self.server_input = QLineEdit()
         server_layout.addWidget(QLabel("伺服器 URL/主機名:"))
         server_layout.addWidget(self.server_input)
         dns_layout.addLayout(server_layout)
         
-        # 自定义 IP（可选）
+        # 自定義 IP（可選）
         ip_layout = QHBoxLayout()
         self.ip_input = QLineEdit()
         self.ip_checkbox = QCheckBox("使用自定義 IP（可選）:")
@@ -52,7 +52,7 @@ class DNSConfigGenerator(QMainWindow):
         ip_layout.addWidget(self.ip_input)
         dns_layout.addLayout(ip_layout)
         
-        # SSID 排除列表
+        # SSID 排除清單
         ssid_group = QWidget()
         ssid_layout = QVBoxLayout(ssid_group)
         
@@ -70,7 +70,7 @@ class DNSConfigGenerator(QMainWindow):
         ssid_layout.addWidget(self.ssid_list)
         ssid_layout.addWidget(self.remove_ssid_btn)
         
-        # 配置文件名称和标识符
+        # 配置檔案名稱和標識符
         profile_group = QWidget()
         profile_layout = QVBoxLayout(profile_group)
         
@@ -89,7 +89,7 @@ class DNSConfigGenerator(QMainWindow):
         description_layout.addWidget(QLabel("設定檔描述:"))
         description_layout.addWidget(self.dns_description)
         
-        # 输出目录选择
+        # 輸出目錄選擇
         output_layout = QHBoxLayout()
         self.output_path = QLineEdit()
         self.output_path.setPlaceholderText("選擇輸出目錄")
@@ -104,14 +104,14 @@ class DNSConfigGenerator(QMainWindow):
         profile_layout.addLayout(description_layout)
         profile_layout.addLayout(output_layout)
         
-        # 签名选项
+        # 簽名選項
         signing_group = QWidget()
         signing_layout = QVBoxLayout(signing_group)
         
         self.sign_checkbox = QCheckBox("使用證書簽名設定檔")
         signing_layout.addWidget(self.sign_checkbox)
         
-        # 证书选择部分
+        # 證書選擇部分
         cert_group = QGroupBox("證書配置")
         cert_group.setObjectName("cert_group")  # 设置对象名以便后续查找
         cert_layout = QVBoxLayout()
@@ -126,7 +126,7 @@ class DNSConfigGenerator(QMainWindow):
         ca_bundle_layout.addWidget(self.ca_bundle_path)
         ca_bundle_layout.addWidget(ca_bundle_btn)
 
-        # CRT证书（必需）
+        # CRT證書（必需）
         crt_layout = QHBoxLayout()
         self.crt_path = QLineEdit()
         self.crt_path.setPlaceholderText("選擇CRT證書 (.crt)")
@@ -136,7 +136,7 @@ class DNSConfigGenerator(QMainWindow):
         crt_layout.addWidget(self.crt_path)
         crt_layout.addWidget(crt_btn)
 
-        # P7B证书（可选）
+        # P7B證書（可選）
         p7b_layout = QHBoxLayout()
         self.p7b_path = QLineEdit()
         self.p7b_path.setPlaceholderText("選擇P7B證書 (.p7b) 可選")
@@ -146,7 +146,7 @@ class DNSConfigGenerator(QMainWindow):
         p7b_layout.addWidget(self.p7b_path)
         p7b_layout.addWidget(p7b_btn)
 
-        # 私钥文件（必需）
+        # 私鑰文件（必需）
         key_layout = QHBoxLayout()
         self.key_path = QLineEdit()
         self.key_path.setPlaceholderText("選擇私鑰文件 (.key/.txt)")
@@ -156,7 +156,7 @@ class DNSConfigGenerator(QMainWindow):
         key_layout.addWidget(self.key_path)
         key_layout.addWidget(key_btn)
 
-        # 密码输入和显示按钮布局
+        # 密碼輸入和顯示按鈕佈局
         password_layout = QHBoxLayout()
         self.key_password = QLineEdit()
         self.key_password.setEchoMode(QLineEdit.EchoMode.Password)
@@ -167,7 +167,7 @@ class DNSConfigGenerator(QMainWindow):
         password_layout.addWidget(self.key_password)
         password_layout.addWidget(self.toggle_password_btn)
 
-        # 组合所有元素
+        # 組合所有元素
         cert_layout.addLayout(ca_bundle_layout)
         cert_layout.addLayout(crt_layout)
         cert_layout.addLayout(p7b_layout)
@@ -176,28 +176,28 @@ class DNSConfigGenerator(QMainWindow):
         cert_group.setLayout(cert_layout)
         signing_layout.addWidget(cert_group)
         
-        # 将所有部件添加到主布局
+        # 將所有部件添加到主佈局
         main_layout.addWidget(dns_group)
         main_layout.addWidget(ssid_group)
         main_layout.addWidget(profile_group)
         main_layout.addWidget(signing_group)
         main_layout.addWidget(self.sign_checkbox)
         
-        # 生成按钮
+        # 生成按鈕
         self.generate_btn = QPushButton("生成設定檔")
         main_layout.addWidget(self.generate_btn)
         
-        # 连接信号槽
+        # 連接信號槽
         self.add_ssid_btn.clicked.connect(self.add_ssid)
         self.remove_ssid_btn.clicked.connect(self.remove_ssid)
         self.generate_btn.clicked.connect(self.generate_config)
         self.ip_checkbox.toggled.connect(self.ip_input.setEnabled)
         self.ip_input.setEnabled(False)
         
-        # 签名相关信号连接
+        # 簽名相關信號連接
         self.sign_checkbox.toggled.connect(self.toggle_signing_options)
         
-        # 初始化时禁用所有证书相关控件
+        # 初始化時禁用所有證書相關控件
         cert_group.setEnabled(False)
         self.sign_checkbox.setChecked(False)
         
