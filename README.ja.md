@@ -31,6 +31,8 @@
 - 秘密鍵ファイル（.key/.txt）
 - 暗号化された秘密鍵をサポート
 
+<img src="Preview/Preview_jp.png" width="50%">
+
 ## 🛠️ インストール要件
 
 ### 環境要件
