@@ -31,6 +31,8 @@ This is a graphical tool for generating Apple DNS .mobileconfig configuration fi
 - Private key file (.key/.txt)
 - Support encrypted private keys
 
+<img src="Preview/Preview_en.png" width="50%">
+
 ## 🛠️ Installation Requirements
 
 ### Environmental requirements
