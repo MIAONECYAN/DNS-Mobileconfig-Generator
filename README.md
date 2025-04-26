@@ -1,4 +1,4 @@
-:tw: [繁體中文](README.md) | :us: [English](README.en.md) | :jp: [日本語](README.ja.md)
+[繁體中文](README.md) | [English](README.en.md) | [日本語](README.ja.md)
 
 ---
 
