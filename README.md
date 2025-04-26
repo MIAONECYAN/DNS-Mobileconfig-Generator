@@ -31,7 +31,7 @@
   - 私鑰文件 (.key/.txt)
   - 支持加密的私鑰
  
-<img src="Preview/Preview_en.png" width="50%">
+<img src="Preview/Preview_zh-TW.png" width="50%">
 
 ## 🛠️ 安裝要求
 
