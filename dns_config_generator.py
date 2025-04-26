@@ -384,7 +384,13 @@ class DNSConfigGenerator(QMainWindow):
     def change_language(self, lang_text):
         print("切换到语言:", lang_text)
         lang_code = self.lang_map.get(lang_text, 'zh_TW')
-        qm_path = os.path.join(os.path.dirname(__file__), 'translations', f'{lang_code}.qm')
+        # 兼容 PyInstaller 與開發環境
+        import sys
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS
+        else:
+            base_path = os.path.dirname(__file__)
+        qm_path = os.path.join(base_path, 'translations', f'{lang_code}.qm')
         print(f"加载文件: {qm_path}")
         if os.path.exists(qm_path):
             QApplication.instance().removeTranslator(self.translator)
