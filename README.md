@@ -1,3 +1,9 @@
+---
+
+:tw: [繁體中文](README.md) | :us: [English](README.en.md) | :jp: [日本語](README.ja.md)
+
+---
+
 # DNS Mobileconfig 設定檔生成器
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -27,8 +33,6 @@
   - 私鑰文件 (.key/.txt)
   - 支持加密的私鑰
 
-<img src="Preview.png" width="70%">
-
 ## 🛠️ 安裝要求
 
 ### 環境需求
@@ -39,7 +43,7 @@
 
 1. 克隆此倉庫：
 ```bash
-git clone https://github.com/MIAONECYAN/DNS-Mobileconfig-Generator.git
+git clone https://github.com/yourusername/dns-mobileconfig-generator.git
 cd dns-mobileconfig-generator
 ```
 
@@ -89,7 +93,7 @@ python dns_config_generator.py
 生成的 .mobileconfig 文件可以通過以下方式安裝：
 - 通過 AirDrop 發送到設備
 - 通過郵件發送到設備
-- 通過 iCloud 下載到設備
+- 通過 Safari 瀏覽器下載到設備
 
 ## ⚠️ 注意事項
 
@@ -127,4 +131,4 @@ python dns_config_generator.py
 ## 📬 聯繫方式
 
 如果您有任何問題或建議，請：
-- 提交 [Issue](https://github.com/MIAONECYAN/DNS-Mobileconfig-Generator/issues)
+- 提交 [Issue](https://github.com/yourusername/dns-mobileconfig-generator/issues)

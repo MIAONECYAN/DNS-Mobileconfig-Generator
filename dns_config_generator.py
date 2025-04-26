@@ -10,44 +10,67 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
 import subprocess
 import tempfile
 import os
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTranslator, QLocale
 from PyQt6.QtGui import QIcon
 
 class DNSConfigGenerator(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("DNS 設定檔生成器")
+        self.translator = QTranslator()
+        self.current_lang = 'zh_TW'
+        self.lang_map = {
+            '繁體中文': 'zh_TW',
+            'English': 'en',
+            '日本語': 'ja'
+        }
+        self.setWindowTitle(self.tr("DNS 設定檔生成器"))
         self.setGeometry(100, 100, 800, 600)
-        
+
         # 創建中央部件和主佈局
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
-        
+
+        # 語言切換
+        lang_layout = QHBoxLayout()
+        self.lang_combo = QComboBox()
+        self.lang_combo.addItems(["繁體中文", "English", "日本語"])
+        self.lang_combo.currentTextChanged.connect(self.change_language)
+        self.lang_label = QLabel(self.tr("語言切換:"))
+        lang_layout.addWidget(self.lang_label)
+        lang_layout.addWidget(self.lang_combo)
+        main_layout.addLayout(lang_layout)
+
         # DNS 伺服器配置
         dns_group = QWidget()
         dns_layout = QVBoxLayout(dns_group)
-        
+
         # DNS 類型選擇
         type_layout = QHBoxLayout()
         self.dns_type = QComboBox()
-        self.dns_type.addItems(["DNS over HTTPS", "DNS over TLS", "DNS over HTTPS/3"])
+        self.dns_type.addItems([
+            self.tr("DNS over HTTPS"),
+            self.tr("DNS over TLS"),
+            self.tr("DNS over HTTPS/3")
+        ])
         self.dns_type.currentTextChanged.connect(self.on_dns_type_changed)
-        type_layout.addWidget(QLabel("DNS 類型:"))
+        self.dns_type_label = QLabel(self.tr("DNS 類型:"))
+        type_layout.addWidget(self.dns_type_label)
         type_layout.addWidget(self.dns_type)
         dns_layout.addLayout(type_layout)
-        
+
         # 伺服器 URL/主機名
         server_layout = QHBoxLayout()
         self.server_input = QLineEdit()
-        server_layout.addWidget(QLabel("伺服器 URL/主機名:"))
+        self.server_label = QLabel(self.tr("伺服器 URL/主機名:"))
+        server_layout.addWidget(self.server_label)
         server_layout.addWidget(self.server_input)
         dns_layout.addLayout(server_layout)
-        
+
         # 自定義 IP（可選）
         ip_layout = QHBoxLayout()
         self.ip_input = QLineEdit()
-        self.ip_checkbox = QCheckBox("使用自定義 IP（可選）:")
+        self.ip_checkbox = QCheckBox(self.tr("使用自定義 IP（可選）:"))
         ip_layout.addWidget(self.ip_checkbox)
         ip_layout.addWidget(self.ip_input)
         dns_layout.addLayout(ip_layout)
@@ -58,13 +81,14 @@ class DNSConfigGenerator(QMainWindow):
         
         ssid_header = QHBoxLayout()
         self.ssid_input = QLineEdit()
-        self.add_ssid_btn = QPushButton("添加 SSID")
-        ssid_header.addWidget(QLabel("排除的 SSID:"))
+        self.add_ssid_btn = QPushButton(self.tr("添加 SSID"))
+        self.ssid_label = QLabel(self.tr("排除的 SSID:"))
+        ssid_header.addWidget(self.ssid_label)
         ssid_header.addWidget(self.ssid_input)
         ssid_header.addWidget(self.add_ssid_btn)
         
         self.ssid_list = QListWidget()
-        self.remove_ssid_btn = QPushButton("刪除選中的 SSID")
+        self.remove_ssid_btn = QPushButton(self.tr("刪除選中的 SSID"))
         
         ssid_layout.addLayout(ssid_header)
         ssid_layout.addWidget(self.ssid_list)
@@ -75,29 +99,33 @@ class DNSConfigGenerator(QMainWindow):
         profile_layout = QVBoxLayout(profile_group)
         
         name_layout = QHBoxLayout()
-        self.profile_name = QLineEdit("自定義 DNS 設定")
-        name_layout.addWidget(QLabel("設定檔名稱:"))
+        self.profile_name_label = QLabel(self.tr("設定檔名稱:"))
+        self.profile_name = QLineEdit(self.tr("自定義 DNS 設定"))
+        name_layout.addWidget(self.profile_name_label)
         name_layout.addWidget(self.profile_name)
         
         identifier_layout = QHBoxLayout()
-        self.profile_identifier = QLineEdit("com.custom.dns.profile")
-        identifier_layout.addWidget(QLabel("設定檔標識符:"))
+        self.profile_identifier_label = QLabel(self.tr("設定檔標識符:"))
+        self.profile_identifier = QLineEdit(self.tr("com.custom.dns.profile"))
+        identifier_layout.addWidget(self.profile_identifier_label)
         identifier_layout.addWidget(self.profile_identifier)
 
         description_layout = QHBoxLayout()
-        self.dns_description = QLineEdit("自定義 DNS 設定")
-        description_layout.addWidget(QLabel("設定檔描述:"))
+        self.profile_description_label = QLabel(self.tr("設定檔描述:"))
+        self.dns_description = QLineEdit(self.tr("自定義 DNS 設定"))
+        description_layout.addWidget(self.profile_description_label)
         description_layout.addWidget(self.dns_description)
         
         # 輸出目錄選擇
         output_layout = QHBoxLayout()
+        self.output_label = QLabel(self.tr("輸出目錄:"))
         self.output_path = QLineEdit()
-        self.output_path.setPlaceholderText("選擇輸出目錄")
-        output_btn = QPushButton("瀏覽...")
-        output_btn.clicked.connect(self.browse_output_dir)
-        output_layout.addWidget(QLabel("輸出目錄:"))
+        self.output_path.setPlaceholderText(self.tr("選擇輸出目錄"))
+        self.output_btn = QPushButton(self.tr("瀏覽..."))
+        self.output_btn.clicked.connect(self.browse_output_dir)
+        output_layout.addWidget(self.output_label)
         output_layout.addWidget(self.output_path)
-        output_layout.addWidget(output_btn)
+        output_layout.addWidget(self.output_btn)
         
         profile_layout.addLayout(name_layout)
         profile_layout.addLayout(identifier_layout)
@@ -108,60 +136,63 @@ class DNSConfigGenerator(QMainWindow):
         signing_group = QWidget()
         signing_layout = QVBoxLayout(signing_group)
         
-        self.sign_checkbox = QCheckBox("使用證書簽名設定檔")
+        self.sign_checkbox = QCheckBox(self.tr("使用證書簽名設定檔"))
         signing_layout.addWidget(self.sign_checkbox)
         
         # 證書選擇部分
-        cert_group = QGroupBox("證書配置")
-        cert_group.setObjectName("cert_group")  # 设置对象名以便后续查找
+        self.cert_group = QGroupBox()
+        self.cert_group.setObjectName("cert_group")  # 设置对象名以便后续查找
         cert_layout = QVBoxLayout()
 
         # CA Bundle（必需）
         ca_bundle_layout = QHBoxLayout()
         self.ca_bundle_path = QLineEdit()
-        self.ca_bundle_path.setPlaceholderText("選擇CA Bundle證書 (.ca-bundle)")
-        ca_bundle_btn = QPushButton("瀏覽...")
-        ca_bundle_btn.clicked.connect(self.browse_ca_bundle)
-        ca_bundle_layout.addWidget(QLabel("CA Bundle:"))
+        self.ca_bundle_path.setPlaceholderText(self.tr("選擇CA Bundle證書 (.ca-bundle)"))
+        self.ca_bundle_btn = QPushButton(self.tr("瀏覽..."))
+        self.ca_bundle_btn.clicked.connect(self.browse_ca_bundle)
+        ca_bundle_layout.addWidget(QLabel(self.tr("CA Bundle:")))
         ca_bundle_layout.addWidget(self.ca_bundle_path)
-        ca_bundle_layout.addWidget(ca_bundle_btn)
+        ca_bundle_layout.addWidget(self.ca_bundle_btn)
 
         # CRT證書（必需）
         crt_layout = QHBoxLayout()
         self.crt_path = QLineEdit()
-        self.crt_path.setPlaceholderText("選擇CRT證書 (.crt)")
-        crt_btn = QPushButton("瀏覽...")
-        crt_btn.clicked.connect(self.browse_crt)
-        crt_layout.addWidget(QLabel("CRT證書:"))
+        self.crt_path.setPlaceholderText(self.tr("選擇CRT證書 (.crt)"))
+        self.crt_btn = QPushButton(self.tr("瀏覽..."))
+        self.crt_btn.clicked.connect(self.browse_crt)
+        self.crt_label = QLabel(self.tr("CRT證書:"))
+        crt_layout.addWidget(self.crt_label)
         crt_layout.addWidget(self.crt_path)
-        crt_layout.addWidget(crt_btn)
+        crt_layout.addWidget(self.crt_btn)
 
         # P7B證書（可選）
         p7b_layout = QHBoxLayout()
         self.p7b_path = QLineEdit()
-        self.p7b_path.setPlaceholderText("選擇P7B證書 (.p7b) 可選")
-        p7b_btn = QPushButton("瀏覽...")
-        p7b_btn.clicked.connect(self.browse_p7b)
-        p7b_layout.addWidget(QLabel("P7B證書:"))
+        self.p7b_path.setPlaceholderText(self.tr("選擇P7B證書 (.p7b) 可選"))
+        self.p7b_btn = QPushButton(self.tr("瀏覽..."))
+        self.p7b_btn.clicked.connect(self.browse_p7b)
+        self.p7b_label = QLabel(self.tr("P7B證書:"))
+        p7b_layout.addWidget(self.p7b_label)
         p7b_layout.addWidget(self.p7b_path)
-        p7b_layout.addWidget(p7b_btn)
+        p7b_layout.addWidget(self.p7b_btn)
 
         # 私鑰文件（必需）
         key_layout = QHBoxLayout()
         self.key_path = QLineEdit()
-        self.key_path.setPlaceholderText("選擇私鑰文件 (.key/.txt)")
-        key_btn = QPushButton("瀏覽...")
-        key_btn.clicked.connect(self.browse_key)
-        key_layout.addWidget(QLabel("私鑰文件:"))
+        self.key_path.setPlaceholderText(self.tr("選擇私鑰文件 (.key/.txt)"))
+        self.key_btn = QPushButton(self.tr("瀏覽..."))
+        self.key_btn.clicked.connect(self.browse_key)
+        self.key_label = QLabel(self.tr("私鑰文件:"))
+        key_layout.addWidget(self.key_label)
         key_layout.addWidget(self.key_path)
-        key_layout.addWidget(key_btn)
+        key_layout.addWidget(self.key_btn)
 
         # 密碼輸入和顯示按鈕佈局
         password_layout = QHBoxLayout()
         self.key_password = QLineEdit()
         self.key_password.setEchoMode(QLineEdit.EchoMode.Password)
-        self.key_password.setPlaceholderText("輸入私鑰密碼（可選）")
-        self.toggle_password_btn = QPushButton("顯示")
+        self.key_password.setPlaceholderText(self.tr("輸入私鑰密碼（可選）"))
+        self.toggle_password_btn = QPushButton(self.tr("顯示"))
         self.toggle_password_btn.setCheckable(True)
         self.toggle_password_btn.toggled.connect(self.toggle_password_visibility)
         password_layout.addWidget(self.key_password)
@@ -173,19 +204,22 @@ class DNSConfigGenerator(QMainWindow):
         cert_layout.addLayout(p7b_layout)
         cert_layout.addLayout(key_layout)
         cert_layout.addLayout(password_layout)
-        cert_group.setLayout(cert_layout)
-        signing_layout.addWidget(cert_group)
+        self.cert_group.setLayout(cert_layout)
+        signing_layout.addWidget(self.cert_group)
         
         # 將所有部件添加到主佈局
         main_layout.addWidget(dns_group)
         main_layout.addWidget(ssid_group)
         main_layout.addWidget(profile_group)
         main_layout.addWidget(signing_group)
-        main_layout.addWidget(self.sign_checkbox)
-        
-        # 生成按鈕
-        self.generate_btn = QPushButton("生成設定檔")
+
+        # 保证按钮是self.generate_btn
+        self.generate_btn = QPushButton(self.tr("生成設定檔"))
         main_layout.addWidget(self.generate_btn)
+
+        container = QWidget()
+        container.setLayout(main_layout)
+        self.setCentralWidget(container)
         
         # 連接信號槽
         self.add_ssid_btn.clicked.connect(self.add_ssid)
@@ -198,7 +232,7 @@ class DNSConfigGenerator(QMainWindow):
         self.sign_checkbox.toggled.connect(self.toggle_signing_options)
         
         # 初始化時禁用所有證書相關控件
-        cert_group.setEnabled(False)
+        self.cert_group.setEnabled(False)
         self.sign_checkbox.setChecked(False)
         
     def add_ssid(self):
@@ -347,10 +381,57 @@ class DNSConfigGenerator(QMainWindow):
             self.key_password.setEchoMode(QLineEdit.EchoMode.Password)
             self.toggle_password_btn.setText("顯示")
             
-    def change_language(self, text):
-        # 刪除語言切換功能
-        pass
-    
+    def change_language(self, lang_text):
+        print("切换到语言:", lang_text)
+        lang_code = self.lang_map.get(lang_text, 'zh_TW')
+        qm_path = os.path.join(os.path.dirname(__file__), 'translations', f'{lang_code}.qm')
+        print(f"加载文件: {qm_path}")
+        if os.path.exists(qm_path):
+            QApplication.instance().removeTranslator(self.translator)
+            loaded = self.translator.load(qm_path)
+            print(f"加载结果: {loaded}")
+            QApplication.instance().installTranslator(self.translator)
+            self.current_lang = lang_code
+        else:
+            print(f"找不到语言文件: {qm_path}")
+        self.retranslateUi()
+        
+    def retranslateUi(self):
+        print("retranslateUi 被调用，当前语言:", self.current_lang)
+        self.setWindowTitle(self.tr("DNS 設定檔生成器"))
+        self.lang_label.setText(self.tr("語言切換:"))
+        self.dns_type_label.setText(self.tr("DNS 類型:"))
+        self.server_label.setText(self.tr("伺服器 URL/主機名:"))
+        self.ssid_label.setText(self.tr("排除的 SSID:"))
+        self.ip_checkbox.setText(self.tr("使用自定義 IP（可選）:"))
+        self.ssid_input.setPlaceholderText(self.tr("排除的 SSID:"))
+        self.add_ssid_btn.setText(self.tr("添加 SSID"))
+        self.remove_ssid_btn.setText(self.tr("刪除選中的 SSID"))
+        self.profile_name_label.setText(self.tr("設定檔名稱:"))
+        self.profile_identifier_label.setText(self.tr("設定檔標識符:"))
+        self.profile_description_label.setText(self.tr("設定檔描述:"))
+        self.profile_name.setText(self.tr("自定義 DNS 設定"))
+        self.dns_description.setText(self.tr("自定義 DNS 設定"))
+        self.output_label.setText(self.tr("輸出目錄:"))
+        self.output_path.setPlaceholderText(self.tr("選擇輸出目錄"))
+        self.output_btn.setText(self.tr("瀏覽..."))
+        self.ca_bundle_btn.setText(self.tr("瀏覽..."))
+        self.crt_btn.setText(self.tr("瀏覽..."))
+        self.p7b_btn.setText(self.tr("瀏覽..."))
+        self.key_btn.setText(self.tr("瀏覽..."))
+        self.crt_label.setText(self.tr("CRT證書:"))
+        self.p7b_label.setText(self.tr("P7B證書:"))
+        self.key_label.setText(self.tr("私鑰文件:"))
+        self.cert_group.setTitle(self.tr("證書配置"))
+        self.sign_checkbox.setText(self.tr("使用證書簽名設定檔"))
+        self.ca_bundle_path.setPlaceholderText(self.tr("選擇CA Bundle證書 (.ca-bundle)"))
+        self.crt_path.setPlaceholderText(self.tr("選擇CRT證書 (.crt)"))
+        self.p7b_path.setPlaceholderText(self.tr("選擇P7B證書 (.p7b) 可選"))
+        self.key_path.setPlaceholderText(self.tr("選擇私鑰文件 (.key/.txt)"))
+        self.key_password.setPlaceholderText(self.tr("輸入私鑰密碼（可選）"))
+        self.toggle_password_btn.setText(self.tr("顯示"))
+        self.generate_btn.setText(self.tr("生成設定檔"))
+
     def generate_config(self):
         try:
             server = self.server_input.text().strip()
