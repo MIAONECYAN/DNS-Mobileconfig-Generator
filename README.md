@@ -30,6 +30,8 @@
   - P7B 證書 (.p7b，可選)
   - 私鑰文件 (.key/.txt)
   - 支持加密的私鑰
+ 
+<img src="Preview/Preview_en.png" width="50%">
 
 ## 🛠️ 安裝要求
 
